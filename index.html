@@ -10,9 +10,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=ZCOOL+KuaiLe&family=Gaegu:wght@300;400;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
 
-<!-- Font Awesome -->
-<link rel="stylesheet" href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/font-awesome/6.5.1/css/all.min.css">
-
 <!-- Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
@@ -43,7 +40,7 @@
 
 <!-- Sound Toggle -->
 <button id="sound-toggle" class="sound-toggle" title="音效开关">
-  <i class="fa-solid fa-volume-high"></i>
+  <span class="icon">🔊</span>
 </button>
 
 <!-- ===== SECTION 1: WELCOME COVER ===== -->
@@ -73,10 +70,10 @@
           <div class="page-back"></div>
           <div class="page-content">
             <div class="deco-element deco-compass">
-              <i class="fa-regular fa-compass"></i>
+              <span class="icon">🧭</span>
             </div>
             <div class="deco-element deco-balloon">
-              <i class="fa-solid fa-hot-air-balloon"></i>
+              <span class="icon">🎈</span>
             </div>
           </div>
         </div>
@@ -98,15 +95,15 @@
 
             <ul class="checklist">
               <li class="checklist-item" style="--delay:0.5">
-                <span class="check-box"><i class="fa-solid fa-check"></i></span>
+                <span class="check-box"><span class="icon">✓</span></span>
                 <span class="check-text">圈出向往之地</span>
               </li>
               <li class="checklist-item" style="--delay:1.0">
-                <span class="check-box"><i class="fa-solid fa-check"></i></span>
+                <span class="check-box"><span class="icon">✓</span></span>
                 <span class="check-text">发现数据故事</span>
               </li>
               <li class="checklist-item" style="--delay:1.5">
-                <span class="check-box"><i class="fa-solid fa-check"></i></span>
+                <span class="check-box"><span class="icon">✓</span></span>
                 <span class="check-text">留下你的足迹</span>
               </li>
             </ul>
@@ -114,7 +111,7 @@
             <div class="wax-seal-wrapper">
               <button id="wax-seal-btn" class="wax-seal" title="翻开手账，开始探索">
                 <span class="seal-inner">
-                  <i class="fa-solid fa-dove"></i>
+                  <span class="icon">🕊️</span>
                 </span>
                 <span class="seal-text">翻开手账</span>
               </button>
@@ -205,13 +202,13 @@
   <!-- Panel tabs -->
   <div class="panel-tabs">
     <button class="panel-tab active" data-tab="charts">
-      <i class="fa-solid fa-chart-pie"></i> 数据手账
+      <span class="icon">📊</span> 数据手账
     </button>
     <button class="panel-tab" data-tab="comments">
-      <i class="fa-solid fa-thumbtack"></i> 旅人留言板
+      <span class="icon">📌</span> 旅人留言板
     </button>
     <button class="panel-close" id="btn-close-insights">
-      <i class="fa-solid fa-xmark"></i>
+      <span class="icon">✕</span>
     </button>
   </div>
 
@@ -327,18 +324,18 @@
       <div class="note-input-area">
         <div class="note-input-paper">
           <div class="star-rating" id="star-rating">
-            <span class="star" data-star="1"><i class="fa-regular fa-star"></i></span>
-            <span class="star" data-star="2"><i class="fa-regular fa-star"></i></span>
-            <span class="star" data-star="3"><i class="fa-regular fa-star"></i></span>
-            <span class="star" data-star="4"><i class="fa-regular fa-star"></i></span>
-            <span class="star" data-star="5"><i class="fa-regular fa-star"></i></span>
+            <span class="star" data-star="1"><span class="icon">☆</span></span>
+            <span class="star" data-star="2"><span class="icon">☆</span></span>
+            <span class="star" data-star="3"><span class="icon">☆</span></span>
+            <span class="star" data-star="4"><span class="icon">☆</span></span>
+            <span class="star" data-star="5"><span class="icon">☆</span></span>
           </div>
           <div class="rating-hint" id="rating-hint"></div>
           <textarea id="note-textarea" class="note-textarea" placeholder="用你的笔迹，写下这里的印象……" maxlength="280"></textarea>
           <div class="note-image-row">
             <input type="file" id="note-image-input" class="note-image-input" accept="image/*">
             <label for="note-image-input" class="note-image-btn" title="添加照片">
-              <i class="fa-solid fa-camera"></i> 加张照片
+              <span class="icon">📷</span> 加张照片
             </label>
             <img id="note-image-preview" class="note-image-preview" style="display:none">
             <button id="note-image-remove" class="note-image-remove" style="display:none" title="移除照片">✕</button>

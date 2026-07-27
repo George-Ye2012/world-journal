@@ -31,7 +31,7 @@ const App = (() => {
     btn.addEventListener('click', () => {
       const on = !SoundFX.isEnabled(); SoundFX.setEnabled(on);
       btn.classList.toggle('muted', !on);
-      btn.querySelector('i').className = on ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
+      btn.querySelector('.icon').textContent = on ? '🔊' : '🔇';
     });
   }
 

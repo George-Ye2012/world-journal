@@ -181,7 +181,7 @@ const CommentsModule = (() => {
     if (fileInput) fileInput.value = '';
     document.querySelectorAll('#star-rating .star').forEach(s => {
       s.classList.remove('active', 'hover');
-      s.querySelector('i').className = 'fa-regular fa-star';
+      s.querySelector('.icon').textContent = '☆';
     });
   }
 
@@ -202,14 +202,14 @@ const CommentsModule = (() => {
 
   function highlightStars(count, cls) {
     document.querySelectorAll('#star-rating .star').forEach(s => {
-      if (parseInt(s.dataset.star) <= count) { s.classList.add(cls); s.querySelector('i').className = 'fa-solid fa-star'; }
+      if (parseInt(s.dataset.star) <= count) { s.classList.add(cls); s.querySelector('.icon').textContent = '★'; }
     });
   }
 
   function clearHighlights() {
     document.querySelectorAll('#star-rating .star').forEach(s => {
       s.classList.remove('hover');
-      if (!s.classList.contains('active')) s.querySelector('i').className = 'fa-regular fa-star';
+      if (!s.classList.contains('active')) s.querySelector('.icon').textContent = '☆';
     });
   }
 
