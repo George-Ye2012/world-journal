@@ -108,13 +108,20 @@ const App = (() => {
     const cnt = CommentsModule.getCommentCount(region.id);
     document.getElementById('score-travelers').textContent = cnt > 0 ? `来自 ${cnt} 位旅人的印象` : '';
 
-    // Flag
+    // Flag — try multiple sources
     const flagImg = document.getElementById('flag-img');
     const flagLabel = document.getElementById('flag-label');
-    const iso = region.iso || 'un';
+    const iso = (region.iso || 'un').toLowerCase();
     if (iso && iso !== 'un') {
-      flagImg.src = `https://flagcdn.com/w160/${iso}.png`;
-      flagImg.alt = name; flagImg.style.display = 'block';
+      flagImg.alt = name;
+      flagImg.style.display = 'block';
+      // Primary: flagpedia, fallback: flagcdn
+      flagImg.src = `https://flagpedia.net/data/flags/w160/${iso}.webp`;
+      flagImg.onerror = function() {
+        if (this.src.includes('flagpedia')) {
+          this.src = `https://flagcdn.com/80x60/${iso}.png`;
+        }
+      };
     } else { flagImg.style.display = 'none'; }
     flagLabel.textContent = region.desc || name;
 

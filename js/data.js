@@ -363,7 +363,7 @@ async function loadRegionData(region) {
     return {
       ...region, ...r, nameCN: r.cn,
       gdp: [], population: [], economy: {},
-      photos: await countryPhotos('cn_'+region.id, 'cn'),
+      photos: await countryPhotos('cn_'+region.id, 'cn', r.en),
       noData: true,
       area: '—', life_expectancy: 0, literacy_rate: 0, gdp_per_capita: '—',
       currency: '人民币', languages: '汉语', children: [],
@@ -378,7 +378,7 @@ async function loadRegionData(region) {
     return {
       ...region, id: region.id, nameCN: cont.cn,
       gdp: [], population: [], economy: {},
-      photos: await countryPhotos(region.id, 'un'),
+      photos: await countryPhotos(region.id, 'un', cont.cn),
       noData: true,
       area: '—', life_expectancy: 0, literacy_rate: 0, gdp_per_capita: '—',
       currency: '多种', languages: '多种',
@@ -398,13 +398,13 @@ async function loadRegionData(region) {
     return {
       ...region, nameCN: region.cn, nameEN: region.en || region.cn,
       noData: true,
-      photos: await countryPhotos(region.id, region.iso),
+      photos: await countryPhotos(region.id, region.iso, region.en || region.nameEN),
       type: 'country', center: region.ctr, bounds: region.bnd,
     };
   }
   return {
     ...region, ...data, nameCN: region.cn, nameEN: region.en || region.cn,
-    photos: await countryPhotos(region.id, region.iso),
+    photos: await countryPhotos(region.id, region.iso, region.en || region.nameEN),
     children: [], type: 'country', center: region.ctr, bounds: region.bnd,
   };
 }
