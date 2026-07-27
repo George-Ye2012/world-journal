@@ -181,7 +181,8 @@ const CommentsModule = (() => {
     if (fileInput) fileInput.value = '';
     document.querySelectorAll('#star-rating .star').forEach(s => {
       s.classList.remove('active', 'hover');
-      s.querySelector('.icon').textContent = '☆';
+      const icon = s.querySelector('.icon');
+      if (icon) icon.textContent = '☆';
     });
   }
 
@@ -202,14 +203,21 @@ const CommentsModule = (() => {
 
   function highlightStars(count, cls) {
     document.querySelectorAll('#star-rating .star').forEach(s => {
-      if (parseInt(s.dataset.star) <= count) { s.classList.add(cls); s.querySelector('.icon').textContent = '★'; }
+      if (parseInt(s.dataset.star) <= count) {
+        s.classList.add(cls);
+        const icon = s.querySelector('.icon');
+        if (icon) icon.textContent = '★';
+      }
     });
   }
 
   function clearHighlights() {
     document.querySelectorAll('#star-rating .star').forEach(s => {
       s.classList.remove('hover');
-      if (!s.classList.contains('active')) s.querySelector('.icon').textContent = '☆';
+      if (!s.classList.contains('active')) {
+        const icon = s.querySelector('.icon');
+        if (icon) icon.textContent = '☆';
+      }
     });
   }
 
