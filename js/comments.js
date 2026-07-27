@@ -14,40 +14,43 @@ const CommentsModule = (() => {
 
   function getDB() {
     if (supabase) return supabase;
+    if (!window.supabase || !window.supabase.createClient) return null;
     if (typeof SUPABASE_URL !== 'undefined' && SUPABASE_URL && typeof SUPABASE_KEY !== 'undefined' && SUPABASE_KEY) {
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      try { supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e) { return null; }
     }
     return supabase;
   }
 
   // --- Storage ---
 
+  // Fetch with timeout
+  function fetchWithTimeout(promise, ms) {
+    return Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))]);
+  }
+
   async function getAllComments() {
     const db = getDB();
     if (db) {
       try {
-        const { data, error } = await db.from('comments').select('*').order('created_at', { ascending: false });
+        const { data, error } = await fetchWithTimeout(
+          db.from('comments').select('*').order('created_at', { ascending: false }),
+          4000
+        );
         if (!error && data) {
-          // Group by region_id
           const grouped = {};
           data.forEach(row => {
             if (!grouped[row.region_id]) grouped[row.region_id] = [];
             grouped[row.region_id].push({
-              text: row.text,
-              rating: row.rating,
-              image: row.image,
-              color: row.color,
-              rotation: row.rotation,
+              text: row.text, rating: row.rating, image: row.image,
+              color: row.color, rotation: row.rotation,
               date: new Date(row.created_at).toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' })
             });
           });
-          // Update cache
           try { localStorage.setItem(CACHE_KEY, JSON.stringify(grouped)); } catch(e) {}
           return grouped;
         }
       } catch(e) { console.warn('Supabase read failed, using cache', e); }
     }
-    // Fallback to cache
     try { return JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch(e) { return {}; }
   }
 
