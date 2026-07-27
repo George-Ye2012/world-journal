@@ -7,8 +7,73 @@ const CommentsModule = (() => {
   let currentRating = 0;
   let pendingImage = null;
   let supabase = null;
+  let isAdmin = false;
   const CACHE_KEY = 'wj_comments_cache';
   const MAX_IMAGE_SIZE = 800;
+  const ADMIN_PW = 'Aug31miku3939';
+
+  // --- Admin ---
+
+  function checkAdmin() { return sessionStorage.getItem('wj_admin') === '1'; }
+  function setAdmin(v) {
+    isAdmin = v;
+    if (v) sessionStorage.setItem('wj_admin', '1');
+    else sessionStorage.removeItem('wj_admin');
+  }
+
+  function initAdminUI() {
+    isAdmin = checkAdmin();
+    // Hidden trigger button
+    const trigger = document.getElementById('admin-trigger');
+    const modal = document.getElementById('admin-modal');
+    const pwInput = document.getElementById('admin-password');
+    const submitBtn = document.getElementById('admin-submit');
+    const cancelBtn = document.getElementById('admin-cancel');
+    const errorEl = document.getElementById('admin-error');
+
+    if (!trigger || !modal) return;
+
+    trigger.addEventListener('click', () => {
+      if (isAdmin) { setAdmin(false); trigger.title = ''; return; }
+      modal.classList.add('active');
+      if (pwInput) { pwInput.value = ''; pwInput.focus(); }
+      if (errorEl) errorEl.textContent = '';
+    });
+
+    if (cancelBtn) cancelBtn.addEventListener('click', () => modal.classList.remove('active'));
+    if (submitBtn) submitBtn.addEventListener('click', () => {
+      if (pwInput && pwInput.value === ADMIN_PW) {
+        setAdmin(true);
+        modal.classList.remove('active');
+        trigger.title = '管理员模式已开启';
+        trigger.style.opacity = '0.5';
+        if (currentRegionId) render(currentRegionId);
+      } else {
+        if (errorEl) errorEl.textContent = '密码错误';
+      }
+    });
+
+    // Enter key to submit
+    if (pwInput) pwInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && submitBtn) submitBtn.click();
+    });
+  }
+
+  async function deleteComment(regionId, index) {
+    if (!isAdmin) return;
+    const db = getDB();
+    if (db) {
+      try {
+        const { data } = await db.from('comments').select('id').eq('region_id', regionId).order('created_at', { ascending: false });
+        if (data && data[index]) {
+          await db.from('comments').delete().eq('id', data[index].id);
+        }
+      } catch(e) { console.warn('Delete failed', e); }
+    }
+    // Also remove from local cache
+    const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+    if (cached[regionId]) { cached[regionId].splice(index, 1); localStorage.setItem(CACHE_KEY, JSON.stringify(cached)); }
+  }
 
   // --- Init Supabase ---
 
@@ -42,7 +107,7 @@ const CommentsModule = (() => {
             if (!grouped[row.region_id]) grouped[row.region_id] = [];
             grouped[row.region_id].push({
               text: row.text, rating: row.rating, image: row.image,
-              color: row.color, rotation: row.rotation,
+              nickname: row.nickname || '', color: row.color, rotation: row.rotation,
               date: new Date(row.created_at).toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' })
             });
           });
@@ -67,6 +132,7 @@ const CommentsModule = (() => {
           region_id: regionId,
           text: comment.text,
           rating: comment.rating,
+          nickname: comment.nickname || '',
           image: comment.image || null,
           color: comment.color,
           rotation: comment.rotation,
@@ -130,9 +196,23 @@ const CommentsModule = (() => {
   function createNoteElement(comment, index) {
     const note = document.createElement('div');
     note.className = 'sticky-note';
+    if (isAdmin) note.classList.add('admin-mode');
     note.style.background = comment.color || randomNoteColor();
     note.style.transform = `rotate(${comment.rotation || randomRotation()}deg)`;
     note.style.zIndex = index;
+
+    // Delete button (admin only)
+    const delBtn = document.createElement('button');
+    delBtn.className = 'note-delete';
+    delBtn.innerHTML = '✕';
+    delBtn.title = '删除此留言';
+    delBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (confirm('确定删除这条留言吗？此操作不可撤销。')) {
+        await deleteComment(currentRegionId, index);
+        render(currentRegionId);
+      }
+    });
 
     const pin = document.createElement('div'); pin.className = 'note-pushpin';
     const stars = document.createElement('div'); stars.className = 'note-stars';
@@ -148,10 +228,12 @@ const CommentsModule = (() => {
 
     const text = document.createElement('div'); text.className = 'note-text'; text.textContent = comment.text;
     const footer = document.createElement('div'); footer.className = 'note-footer';
-    const author = document.createElement('span'); author.className = 'note-author'; author.textContent = '— 匿名旅人';
+    const author = document.createElement('span'); author.className = 'note-author';
+    author.textContent = '— ' + (comment.nickname || '匿名旅人');
     const date = document.createElement('span'); date.className = 'note-date'; date.textContent = comment.date || '';
 
     footer.appendChild(author); footer.appendChild(date);
+    note.appendChild(delBtn);
     note.appendChild(pin); note.appendChild(stars);
     if (imageEl) note.appendChild(imageEl);
     note.appendChild(text); note.appendChild(footer);
@@ -171,6 +253,7 @@ const CommentsModule = (() => {
 
   function resetInput() {
     currentRating = 0; pendingImage = null;
+    const nn = document.getElementById('note-nickname'); if (nn) nn.value = '';
     const ta = document.getElementById('note-textarea'); if (ta) ta.value = '';
     const hint = document.getElementById('rating-hint'); if (hint) hint.textContent = '';
     const preview = document.getElementById('note-image-preview');
@@ -261,9 +344,11 @@ const CommentsModule = (() => {
       if (!text && !pendingImage) return;
       if (currentRating === 0) { document.getElementById('rating-hint').textContent = '请先给个评分吧～'; return; }
 
+      const nickname = document.getElementById('note-nickname');
       const comment = {
-        text: text || '', rating: currentRating, color: randomNoteColor(),
-        rotation: randomRotation(),
+        text: text || '', rating: currentRating,
+        nickname: nickname ? nickname.value.trim() : '',
+        color: randomNoteColor(), rotation: randomRotation(),
         date: new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' })
       };
       if (pendingImage) comment.image = pendingImage;
@@ -280,6 +365,6 @@ const CommentsModule = (() => {
     });
   }
 
-  function init() { initStarRating(); initImageUpload(); initSubmit(); }
+  function init() { initAdminUI(); initStarRating(); initImageUpload(); initSubmit(); }
   return { init, render, getCommentCount };
 })();

@@ -1550,6 +1550,94 @@ body::before {
   opacity: 0.5;
 }
 
+/* --- Admin Trigger (hidden in top-right) --- */
+.admin-trigger {
+  position: fixed;
+  top: 16px; right: 60px;
+  z-index: 9999;
+  width: 36px; height: 36px;
+  border: none;
+  background: transparent;
+  cursor: default;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.admin-trigger:hover { opacity: 0.3; }
+
+/* Admin Password Modal */
+.admin-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.admin-modal.active { display: flex; }
+.admin-modal-card {
+  background: var(--paper-cream);
+  padding: 30px;
+  border-radius: 4px;
+  box-shadow: var(--shadow-card);
+  text-align: center;
+  min-width: 280px;
+}
+.admin-modal-card h3 {
+  font-family: var(--font-hand-cn);
+  font-size: 20px;
+  margin-bottom: 16px;
+  color: var(--ink-main);
+}
+.admin-pw-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid var(--paper-dark);
+  border-radius: 4px;
+  font-family: var(--font-hand);
+  font-size: 16px;
+  background: #fff;
+  outline: none;
+  margin-bottom: 14px;
+}
+.admin-pw-input:focus { border-color: var(--stamp-blue); }
+.admin-modal-btns { display: flex; gap: 12px; justify-content: center; }
+.admin-error { color: var(--seal-red); font-size: 13px; margin-top: 8px; min-height: 18px; }
+
+/* Delete button on sticky notes (admin only) */
+.note-delete {
+  position: absolute;
+  top: 4px; right: 8px;
+  width: 18px; height: 18px;
+  border: none;
+  background: rgba(217,74,74,0.12);
+  color: var(--seal-red);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 10px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  transition: background 0.2s;
+}
+.note-delete:hover { background: rgba(217,74,74,0.25); }
+.sticky-note.admin-mode .note-delete { display: flex; }
+
+/* Nickname input */
+.note-nickname {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: var(--font-hand);
+  font-size: 13px;
+  color: var(--stamp-blue);
+  outline: none;
+  margin-bottom: 2px;
+}
+.note-nickname::placeholder { color: rgba(74,107,138,0.35); }
+.note-author { font-style: normal; }
+
 /* ============================================================
    LOADING OVERLAY
    ============================================================ */

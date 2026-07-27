@@ -43,6 +43,22 @@
   <span class="icon">🔊</span>
 </button>
 
+<!-- Hidden Admin Button -->
+<button id="admin-trigger" class="admin-trigger" title=""></button>
+
+<!-- Admin Password Modal -->
+<div id="admin-modal" class="admin-modal">
+  <div class="admin-modal-card">
+    <h3>🔐 管理员验证</h3>
+    <input type="password" id="admin-password" class="admin-pw-input" placeholder="输入密码">
+    <div class="admin-modal-btns">
+      <button id="admin-cancel" class="tape-btn tape-btn-gray"><span>取消</span></button>
+      <button id="admin-submit" class="tape-btn tape-btn-yellow"><span>验证</span></button>
+    </div>
+    <p id="admin-error" class="admin-error"></p>
+  </div>
+</div>
+
 <!-- ===== SECTION 1: WELCOME COVER ===== -->
 <section id="section-welcome" class="fullscreen active">
   <div class="desk-scene">
@@ -330,6 +346,7 @@
             <span class="star" data-star="4"><span class="icon">☆</span></span>
             <span class="star" data-star="5"><span class="icon">☆</span></span>
           </div>
+          <input type="text" id="note-nickname" class="note-nickname" placeholder="你的昵称（选填）" maxlength="20">
           <div class="rating-hint" id="rating-hint"></div>
           <textarea id="note-textarea" class="note-textarea" placeholder="用你的笔迹，写下这里的印象……" maxlength="280"></textarea>
           <div class="note-image-row">
