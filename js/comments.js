@@ -79,11 +79,24 @@ const CommentsModule = (() => {
 
   function getDB() {
     if (supabase) return supabase;
-    if (!window.supabase || !window.supabase.createClient) return null;
+    if (!window.supabase || !window.supabase.createClient) return null; // SDK not loaded yet
     if (typeof SUPABASE_URL !== 'undefined' && SUPABASE_URL && typeof SUPABASE_KEY !== 'undefined' && SUPABASE_KEY) {
       try { supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e) { return null; }
     }
     return supabase;
+  }
+
+  // Lazy-load Supabase SDK on first use (never blocks page load)
+  let sdkLoading = false;
+  let sdkLoaded = false;
+  function ensureSDK() {
+    if (sdkLoaded || window.supabase) { sdkLoaded = true; return; }
+    if (sdkLoading) return;
+    sdkLoading = true;
+    const s = document.createElement('script');
+    s.src = 'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+    s.onload = () => { sdkLoaded = true; };
+    document.head.appendChild(s);
   }
 
   // --- Storage ---
@@ -94,6 +107,7 @@ const CommentsModule = (() => {
   }
 
   async function getAllComments() {
+    ensureSDK();
     const db = getDB();
     if (db) {
       try {
@@ -125,6 +139,7 @@ const CommentsModule = (() => {
   }
 
   async function saveComment(regionId, comment) {
+    ensureSDK();
     const db = getDB();
     if (db) {
       try {
