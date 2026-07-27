@@ -1428,18 +1428,14 @@ body::before {
   margin-bottom: 6px;
 }
 .star-rating .star {
-  font-size: 20px;
+  font-size: 22px;
   cursor: pointer;
   color: var(--ink-light);
-  transition: all 0.15s ease;
+  transition: color 0.15s ease;
+  user-select: none;
 }
-.star-rating .star.active {
-  color: #E8A840;
-  animation: star-fill 0.15s ease-out;
-}
-.star-rating .star.hover {
-  color: #D4A040;
-}
+.star-rating .star.active { color: #E8A840; }
+.star-rating .star.hover { color: #D4A040; }
 @keyframes star-fill {
   0% { transform: scale(1.4); opacity: 0.5; }
   100% { transform: scale(1); opacity: 1; }

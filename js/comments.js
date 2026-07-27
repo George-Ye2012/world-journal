@@ -171,53 +171,56 @@ const CommentsModule = (() => {
 
   function resetInput() {
     currentRating = 0; pendingImage = null;
-    document.getElementById('note-textarea').value = '';
-    document.getElementById('rating-hint').textContent = '';
+    const ta = document.getElementById('note-textarea'); if (ta) ta.value = '';
+    const hint = document.getElementById('rating-hint'); if (hint) hint.textContent = '';
     const preview = document.getElementById('note-image-preview');
     const removeBtn = document.getElementById('note-image-remove');
     const fileInput = document.getElementById('note-image-input');
     if (preview) { preview.style.display = 'none'; preview.src = ''; }
     if (removeBtn) removeBtn.style.display = 'none';
     if (fileInput) fileInput.value = '';
-    document.querySelectorAll('#star-rating .star').forEach(s => {
-      s.classList.remove('active', 'hover');
-      const icon = s.querySelector('.icon');
-      if (icon) icon.textContent = '☆';
-    });
+    updateStarDisplay(0);
   }
 
   // --- Star Rating ---
 
+  function updateStarDisplay(count) {
+    const stars = document.querySelectorAll('#star-rating .star');
+    stars.forEach(s => {
+      const v = parseInt(s.dataset.star);
+      const icon = s.querySelector('.icon');
+      if (!icon) return;
+      if (v <= count) {
+        s.classList.add('active');
+        icon.textContent = '★';
+      } else {
+        s.classList.remove('active');
+        icon.textContent = '☆';
+      }
+    });
+  }
+
   function initStarRating() {
     const sc = document.getElementById('star-rating'); if (!sc) return;
-    sc.querySelectorAll('.star').forEach(star => {
-      star.addEventListener('mouseenter', () => highlightStars(parseInt(star.dataset.star), 'hover'));
-      star.addEventListener('mouseleave', () => { clearHighlights(); if (currentRating > 0) highlightStars(currentRating, 'active'); });
+    const stars = sc.querySelectorAll('.star');
+
+    stars.forEach(star => {
+      star.addEventListener('mouseenter', () => {
+        const v = parseInt(star.dataset.star);
+        stars.forEach(s => {
+          if (parseInt(s.dataset.star) <= v) s.classList.add('hover');
+        });
+      });
+      star.addEventListener('mouseleave', () => {
+        stars.forEach(s => s.classList.remove('hover'));
+      });
       star.addEventListener('click', () => {
         currentRating = parseInt(star.dataset.star);
-        SoundFX.starClick(); clearHighlights(); highlightStars(currentRating, 'active');
-        document.getElementById('rating-hint').textContent = `你给了 ${currentRating} 颗星`;
+        try { SoundFX.starClick(); } catch(e) {}
+        updateStarDisplay(currentRating);
+        const hint = document.getElementById('rating-hint');
+        if (hint) hint.textContent = '你给了 ' + currentRating + ' 颗星';
       });
-    });
-  }
-
-  function highlightStars(count, cls) {
-    document.querySelectorAll('#star-rating .star').forEach(s => {
-      if (parseInt(s.dataset.star) <= count) {
-        s.classList.add(cls);
-        const icon = s.querySelector('.icon');
-        if (icon) icon.textContent = '★';
-      }
-    });
-  }
-
-  function clearHighlights() {
-    document.querySelectorAll('#star-rating .star').forEach(s => {
-      s.classList.remove('hover');
-      if (!s.classList.contains('active')) {
-        const icon = s.querySelector('.icon');
-        if (icon) icon.textContent = '☆';
-      }
     });
   }
 
