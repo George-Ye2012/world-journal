@@ -1,0 +1,7 @@
+{
+  "br":{"score":4,"desc":"桑巴与足球的热土","area":"851万km²","life":76,"lit":93,"gdppc":"$9,900","currency":"雷亚尔BRL","lang":"葡萄牙语","gdp":[1900,1950,1450,1700,1850,2000,2150],"pop":[211,212,213,214,215,216,217],"econ":{"industry":65,"agriculture":72,"service":78,"tech":55,"education":58}},
+  "ar":{"score":3,"desc":"探戈与潘帕斯草原的故乡","area":"278万km²","life":77,"lit":99,"gdppc":"$12,600","currency":"比索ARS","lang":"西班牙语","gdp":[550,520,420,500,540,560,590],"pop":[45,45,46,46,46,47,47],"econ":{"industry":58,"agriculture":68,"service":70,"tech":48,"education":70}},
+  "cl":{"score":3,"desc":"安第斯山脉的狭长国度","area":"75.6万km²","life":80,"lit":97,"gdppc":"$17,000","currency":"比索CLP","lang":"西班牙语","gdp":[280,290,270,300,320,335,355],"pop":[19,19,20,20,20,20,21],"econ":{"industry":60,"agriculture":35,"service":70,"tech":52,"education":68}},
+  "pe":{"score":3,"desc":"印加帝国的辉煌遗迹","area":"128万km²","life":77,"lit":94,"gdppc":"$7,500","currency":"索尔PEN","lang":"西班牙语","gdp":[220,230,210,225,240,255,270],"pop":[33,33,34,34,35,35,36],"econ":{"industry":52,"agriculture":45,"service":65,"tech":40,"education":58}},
+  "co":{"score":3,"desc":"魔幻现实主义的咖啡国度","area":"114万km²","life":77,"lit":95,"gdppc":"$8,300","currency":"比索COP","lang":"西班牙语","gdp":[330,340,300,360,385,410,440],"pop":[50,51,51,52,52,53,53],"econ":{"industry":52,"agriculture":48,"service":68,"tech":45,"education":58}}
+}

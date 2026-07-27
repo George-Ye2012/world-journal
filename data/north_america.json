@@ -1,0 +1,9 @@
+{
+  "us":{"score":5,"desc":"星条旗之国，世界第一大经济体","area":"937万km²","life":78,"lit":99,"gdppc":"$81,800","currency":"美元USD","lang":"英语","gdp":[20500,21500,21000,23000,24500,26000,27800],"pop":[328,330,332,334,336,338,340],"econ":{"industry":90,"agriculture":60,"service":95,"tech":98,"education":88}},
+  "ca":{"score":4,"desc":"枫叶之国，广袤北境","area":"998万km²","life":82,"lit":99,"gdppc":"$52,400","currency":"加元CAD","lang":"英语、法语","gdp":[1700,1750,1680,1850,1950,2050,2150],"pop":[38,38,39,39,40,40,41],"econ":{"industry":70,"agriculture":45,"service":85,"tech":80,"education":88}},
+  "mx":{"score":4,"desc":"玛雅文明与仙人掌之国","area":"196万km²","life":75,"lit":95,"gdppc":"$12,000","currency":"比索MXN","lang":"西班牙语","gdp":[1250,1300,1150,1350,1420,1500,1580],"pop":[126,127,128,129,130,131,132],"econ":{"industry":72,"agriculture":50,"service":75,"tech":60,"education":65}},
+  "cu":{"score":3,"desc":"加勒比海的革命明珠","area":"11万km²","life":79,"lit":100,"gdppc":"$8,500","currency":"比索CUP","lang":"西班牙语","gdp":[100,105,95,100,105,110,118],"pop":[11.3,11.3,11.2,11.2,11.1,11.1,11.0],"econ":{"industry":40,"agriculture":35,"service":62,"tech":35,"education":75}},
+  "cr":{"score":4,"desc":"中美洲的生态天堂","area":"5.1万km²","life":80,"lit":98,"gdppc":"$13,000","currency":"科朗CRC","lang":"西班牙语","gdp":[60,63,60,65,68,72,78],"pop":[5.0,5.1,5.1,5.2,5.2,5.3,5.3],"econ":{"industry":45,"agriculture":40,"service":72,"tech":55,"education":70}},
+  "pa":{"score":3,"desc":"连接两洋的运河之国","area":"7.5万km²","life":79,"lit":96,"gdppc":"$15,000","currency":"美元/巴波亚","lang":"西班牙语","gdp":[65,68,60,62,68,72,78],"pop":[4.2,4.3,4.3,4.4,4.4,4.5,4.5],"econ":{"industry":40,"agriculture":25,"service":80,"tech":45,"education":65}},
+  "jm":{"score":3,"desc":"雷鬼音乐的发源地","area":"1.1万km²","life":75,"lit":89,"gdppc":"$5,800","currency":"牙买加元JMD","lang":"英语","gdp":[15,15,14,15,16,17,18],"pop":[2.9,2.9,3.0,3.0,3.0,3.0,3.1],"econ":{"industry":35,"agriculture":30,"service":65,"tech":38,"education":55}}
+}

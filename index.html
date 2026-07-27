@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>环球手札 · World Journal</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=ZCOOL+KuaiLe&family=Gaegu:wght@300;400;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<!-- Styles -->
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- SVG Filters (hidden) -->
+<svg style="position:absolute;width:0;height:0;" aria-hidden="true">
+  <filter id="pencil-sketch">
+    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise"/>
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="pencil-sketch-heavy">
+    <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="4" result="noise"/>
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="ink-bleed">
+    <feTurbulence type="fractalNoise" baseFrequency="0.08" numOctaves="2" result="noise"/>
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="watercolor-edge">
+    <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" result="noise"/>
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<!-- Sound Toggle -->
+<button id="sound-toggle" class="sound-toggle" title="音效开关">
+  <i class="fa-solid fa-volume-high"></i>
+</button>
+
+<!-- ===== SECTION 1: WELCOME COVER ===== -->
+<section id="section-welcome" class="fullscreen active">
+  <div class="desk-scene">
+    <!-- Desk props -->
+    <div class="desk-prop pencil-red"></div>
+    <div class="desk-prop pencil-blue"></div>
+    <div class="desk-prop eraser"></div>
+    <div class="desk-prop coffee-cup">
+      <div class="steam steam-1"></div>
+      <div class="steam steam-2"></div>
+      <div class="steam steam-3"></div>
+    </div>
+
+    <!-- Journal Book -->
+    <div class="journal-book" id="journal-book">
+      <div class="journal-cover">
+        <div class="cover-texture"></div>
+        <div class="cover-title">环球手札</div>
+        <div class="cover-subtitle">World Journal</div>
+        <div class="cover-binding"></div>
+      </div>
+      <div class="journal-inner">
+        <!-- Left page -->
+        <div class="journal-page page-left">
+          <div class="page-back"></div>
+          <div class="page-content">
+            <div class="deco-element deco-compass">
+              <i class="fa-regular fa-compass"></i>
+            </div>
+            <div class="deco-element deco-balloon">
+              <i class="fa-solid fa-hot-air-balloon"></i>
+            </div>
+          </div>
+        </div>
+        <!-- Right page -->
+        <div class="journal-page page-right">
+          <div class="page-back"></div>
+          <div class="page-content">
+            <h1 class="welcome-title">
+              <span class="char" style="--i:0">环</span>
+              <span class="char" style="--i:1">球</span>
+              <span class="char" style="--i:2">手</span>
+              <span class="char" style="--i:3">札</span>
+            </h1>
+            <div class="welcome-underline">
+              <svg viewBox="0 0 200 20" class="wave-line">
+                <path d="M10,15 Q50,5 90,12 T130,8 T170,14 T200,10" fill="none" stroke="#3A3A3C" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+
+            <ul class="checklist">
+              <li class="checklist-item" style="--delay:0.5">
+                <span class="check-box"><i class="fa-solid fa-check"></i></span>
+                <span class="check-text">圈出向往之地</span>
+              </li>
+              <li class="checklist-item" style="--delay:1.0">
+                <span class="check-box"><i class="fa-solid fa-check"></i></span>
+                <span class="check-text">发现数据故事</span>
+              </li>
+              <li class="checklist-item" style="--delay:1.5">
+                <span class="check-box"><i class="fa-solid fa-check"></i></span>
+                <span class="check-text">留下你的足迹</span>
+              </li>
+            </ul>
+
+            <div class="wax-seal-wrapper">
+              <button id="wax-seal-btn" class="wax-seal" title="翻开手账，开始探索">
+                <span class="seal-inner">
+                  <i class="fa-solid fa-dove"></i>
+                </span>
+                <span class="seal-text">翻开手账</span>
+              </button>
+              <div class="wax-drips">
+                <span class="drip d1"></span><span class="drip d2"></span><span class="drip d3"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Center crease -->
+      <div class="journal-crease" id="journal-crease"></div>
+      <!-- Crack line (appears on wax seal click) -->
+      <div class="journal-crack" id="journal-crack"></div>
+    </div>
+
+    <!-- Decorative elements around the journal -->
+    <div class="corner-deco deco-cat" title="一只打盹的猫">
+      <svg viewBox="0 0 60 40" class="cat-svg">
+        <ellipse cx="30" cy="30" rx="22" ry="14" fill="none" stroke="#3A3A3C" stroke-width="1.5"/>
+        <circle cx="18" cy="24" r="8" fill="none" stroke="#3A3A3C" stroke-width="1.5"/>
+        <path d="M12,16 L8,8 L16,14" fill="none" stroke="#3A3A3C" stroke-width="1.2"/>
+        <path d="M24,16 L20,8 L28,14" fill="none" stroke="#3A3A3C" stroke-width="1.2"/>
+        <path d="M42,26 Q52,22 48,30" fill="none" stroke="#3A3A3C" stroke-width="1.5" class="cat-tail"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 2: MAP EXPLORER ===== -->
+<section id="section-map" class="fullscreen">
+  <div id="map-container" class="map-container">
+    <!-- Guide note -->
+    <div id="guide-note" class="guide-note">
+      <button class="guide-note-close" id="guide-note-close" title="关闭提示">✕</button>
+      <div class="guide-note-inner">
+        <p class="guide-text">在地图上，用铅笔轻轻<br>圈出你好奇的地方。</p>
+        <div class="guide-doodle">
+          <svg viewBox="0 0 40 40" width="40" height="40">
+            <line x1="8" y1="32" x2="28" y2="8" stroke="#3A3A3C" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="12" cy="28" r="3" fill="none" stroke="#3A3A3C" stroke-width="1.2"/>
+          </svg>
+        </div>
+      </div>
+      <div class="washi-tape tape-corner"></div>
+    </div>
+
+    <!-- Map reveal overlay (watercolor spread) -->
+    <div id="map-reveal" class="map-reveal"></div>
+
+    <!-- Map element injected by Leaflet -->
+    <div id="map"></div>
+
+    <!-- Bottom hint -->
+    <div class="map-hint">按住拖拽圈选区域 · 滚轮缩放地图</div>
+  </div>
+
+  <!-- Polaroid confirmation overlay -->
+  <div id="polaroid-overlay" class="polaroid-overlay">
+    <div class="polaroid-card">
+      <div class="polaroid-photo">
+        <div id="polaroid-mini-map"></div>
+        <div class="polaroid-developing"></div>
+      </div>
+      <div class="polaroid-label">
+        <span id="polaroid-region-name"></span>
+      </div>
+      <div class="polaroid-actions">
+        <button class="tape-btn tape-btn-gray" id="btn-redraw">
+          <span>再画一次</span>
+        </button>
+        <button class="tape-btn tape-btn-yellow" id="btn-confirm">
+          <span>翻开这里</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transition overlay for page flip -->
+  <div id="flip-overlay" class="flip-overlay">
+    <div class="flip-left"></div>
+    <div class="flip-right"></div>
+  </div>
+</section>
+
+<!-- ===== SECTION 3: DATA INSIGHTS (Sidebar PC / Drawer Mobile) ===== -->
+<section id="section-insights" class="insights-panel">
+  <!-- Panel tabs -->
+  <div class="panel-tabs">
+    <button class="panel-tab active" data-tab="charts">
+      <i class="fa-solid fa-chart-pie"></i> 数据手账
+    </button>
+    <button class="panel-tab" data-tab="comments">
+      <i class="fa-solid fa-thumbtack"></i> 旅人留言板
+    </button>
+    <button class="panel-close" id="btn-close-insights">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <!-- Tab: Charts -->
+  <div class="panel-content active" id="tab-charts">
+    <div class="insights-header">
+      <h2 class="region-title" id="insights-region-name">—</h2>
+      <div class="region-underline"></div>
+      <div class="date-stamp">
+        <span class="stamp-text" id="date-stamp-text"></span>
+      </div>
+      <div class="score-row">
+        <span class="score-label">综合印象分：</span>
+        <span class="score-hearts" id="score-hearts">❤❤❤❤🤍</span>
+        <span class="score-num" id="score-num">(4/5)</span>
+        <span class="score-travelers" id="score-travelers"></span>
+      </div>
+    </div>
+
+    <div class="charts-scroll">
+      <!-- No data placeholder -->
+      <div class="no-data-msg" id="no-data-msg" style="display:none">
+        <div class="no-data-icon">📋</div>
+        <p class="no-data-title">暂未收录详细数据</p>
+        <p class="no-data-sub">该地区的基础信息正在整理中<br>你可以先去留言板留下足迹 ✨</p>
+      </div>
+
+      <!-- Flag -->
+      <div class="flag-row" id="flag-row">
+        <img id="flag-img" src="" alt="" style="display:none">
+        <span class="flag-label" id="flag-label"></span>
+      </div>
+
+      <!-- Photo gallery -->
+      <div class="photo-strip" id="photo-strip"></div>
+
+      <!-- Data info card -->
+      <div class="chart-card data-info-card" id="card-info" style="--card-delay:0.05">
+        <div class="washi-tape tape-top tape-yellow-washi"></div>
+        <div class="info-grid" id="info-grid">
+          <div class="info-item"><span class="info-label">面积</span><span class="info-value" id="info-area">—</span></div>
+          <div class="info-item"><span class="info-label">人均寿命</span><span class="info-value" id="info-life">—</span></div>
+          <div class="info-item"><span class="info-label">识字率</span><span class="info-value" id="info-literacy">—</span></div>
+          <div class="info-item"><span class="info-label">人均GDP</span><span class="info-value" id="info-gdppc">—</span></div>
+          <div class="info-item"><span class="info-label">货币</span><span class="info-value" id="info-currency">—</span></div>
+          <div class="info-item"><span class="info-label">语言</span><span class="info-value" id="info-languages">—</span></div>
+        </div>
+      </div>
+
+      <!-- GDP Bar Chart -->
+      <div class="chart-card" id="card-bar" style="--card-delay:0">
+        <div class="washi-tape tape-top tape-blue"></div>
+        <div class="washi-tape tape-bottom tape-green"></div>
+        <div class="card-title-bar">
+          <span>经济脉搏</span>
+          <svg viewBox="0 0 60 20" width="60" height="20">
+            <path d="M2,10 Q10,2 18,10 T34,10 T50,10 T58,10" fill="none" stroke="#D94A4A" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="chart-bar"></canvas>
+        </div>
+      </div>
+
+      <!-- Radar Chart -->
+      <div class="chart-card chart-card-round" id="card-radar" style="--card-delay:0.15">
+        <div class="washi-tape tape-diagonal tape-pink"></div>
+        <div class="card-title-bar">
+          <span>多维画像</span>
+        </div>
+        <div class="chart-wrapper chart-wrapper-round">
+          <canvas id="chart-radar"></canvas>
+        </div>
+      </div>
+
+      <!-- Line Chart -->
+      <div class="chart-card chart-card-wide" id="card-line" style="--card-delay:0.3">
+        <div class="washi-tape tape-side tape-yellow-washi"></div>
+        <div class="card-title-bar card-title-vertical">
+          <span>时间足迹</span>
+        </div>
+        <div class="stamp-deco">
+          <span class="mini-stamp">✈</span>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="chart-line"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Comments -->
+  <div class="panel-content" id="tab-comments">
+    <div class="cork-board" id="cork-board">
+      <!-- Cork texture marks -->
+      <div class="cork-stain cork-stain-coffee"></div>
+      <div class="cork-stain cork-stain-pinholes"></div>
+      <div class="cork-stain cork-stain-tear"></div>
+
+      <!-- Existing notes injected by JS -->
+      <div id="notes-container" class="notes-container"></div>
+
+      <!-- Empty state -->
+      <div id="empty-notes" class="empty-notes">
+        <div class="empty-note">
+          <p>还没有人来过这里...</p>
+          <p>来做第一个留下足迹的旅人吧！</p>
+        </div>
+        <div class="empty-arrow">↓</div>
+      </div>
+
+      <!-- Input area -->
+      <div class="note-input-area">
+        <div class="note-input-paper">
+          <div class="star-rating" id="star-rating">
+            <span class="star" data-star="1"><i class="fa-regular fa-star"></i></span>
+            <span class="star" data-star="2"><i class="fa-regular fa-star"></i></span>
+            <span class="star" data-star="3"><i class="fa-regular fa-star"></i></span>
+            <span class="star" data-star="4"><i class="fa-regular fa-star"></i></span>
+            <span class="star" data-star="5"><i class="fa-regular fa-star"></i></span>
+          </div>
+          <div class="rating-hint" id="rating-hint"></div>
+          <textarea id="note-textarea" class="note-textarea" placeholder="用你的笔迹，写下这里的印象……" maxlength="280"></textarea>
+          <div class="note-image-row">
+            <input type="file" id="note-image-input" class="note-image-input" accept="image/*">
+            <label for="note-image-input" class="note-image-btn" title="添加照片">
+              <i class="fa-solid fa-camera"></i> 加张照片
+            </label>
+            <img id="note-image-preview" class="note-image-preview" style="display:none">
+            <button id="note-image-remove" class="note-image-remove" style="display:none" title="移除照片">✕</button>
+          </div>
+        </div>
+        <button id="btn-submit-note" class="tape-btn tape-btn-submit">
+          <span>贴上留言板</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Loading overlay -->
+<div id="loading-overlay" class="loading-overlay">
+  <div class="loading-book">
+    <div class="loading-page"></div>
+    <div class="loading-page"></div>
+    <div class="loading-page"></div>
+  </div>
+  <p class="loading-text">正在翻阅档案...</p>
+</div>
+
+<!-- Scripts -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="js/apikey.js"></script>
+<script src="js/data.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/map.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/comments.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

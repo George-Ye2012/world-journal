@@ -1,0 +1,5 @@
+{
+  "au":{"score":4,"desc":"袋鼠与考拉的阳光大陆","area":"769万km²","life":83,"lit":99,"gdppc":"$65,900","currency":"澳元AUD","lang":"英语","gdp":[1400,1450,1420,1550,1620,1700,1780],"pop":[25,26,26,26,26,27,27],"econ":{"industry":68,"agriculture":48,"service":82,"tech":72,"education":85}},
+  "nz":{"score":4,"desc":"中土世界的纯净长白云之乡","area":"27万km²","life":83,"lit":99,"gdppc":"$49,600","currency":"新西兰元NZD","lang":"英语、毛利语","gdp":[210,220,215,235,245,255,268],"pop":[5.1,5.1,5.2,5.2,5.3,5.3,5.4],"econ":{"industry":55,"agriculture":60,"service":80,"tech":65,"education":85}},
+  "fj":{"score":3,"desc":"南太平洋的热带天堂","area":"1.8万km²","life":68,"lit":94,"gdppc":"$5,800","currency":"斐济元FJD","lang":"英语、斐济语","gdp":[5,5.2,4.5,5.0,5.3,5.5,5.8],"pop":[0.9,0.9,0.9,0.9,1.0,1.0,1.0],"econ":{"industry":28,"agriculture":42,"service":62,"tech":30,"education":58}}
+}
