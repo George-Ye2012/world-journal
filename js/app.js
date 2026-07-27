@@ -121,7 +121,7 @@ const App = (() => {
     // Photos (dynamically built, 0-5 picsum photos)
     const strip = document.getElementById('photo-strip');
     strip.innerHTML = '';
-    const photos = region.photos || countryPhotos(region.id, iso);
+    const photos = region.photos || await countryPhotos(region.id, iso);
     const pics = photos.filter(p => p.type === 'photo').slice(0, 5);
     pics.forEach((p, i) => {
       const item = document.createElement('div'); item.className = 'photo-item';
@@ -253,7 +253,10 @@ const App = (() => {
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    init();
+    try { init(); } catch(e) { console.error('App init error:', e); }
+    // Ensure close button always works
+    const closeBtn = document.getElementById('btn-close-insights');
+    if (closeBtn) closeBtn.addEventListener('click', closeInsights);
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && currentSection === 'insights') closeInsights(); });
     setTimeout(hideLoading, 800);
   });

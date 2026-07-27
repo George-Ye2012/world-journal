@@ -226,14 +226,14 @@ const CONTINENTS = {
 
 // China sub-regions
 const CHINA_REGIONS = {
-  "华北":{id:"huabei",cn:"华北地区",en:"North China",ctr:[39.90,116.40],bnd:[[35,110],[43,123]],desc:"京畿重地，千年古都",score:4},
-  "华东":{id:"huadong",cn:"华东地区",en:"East China",ctr:[31.23,121.47],bnd:[[27,116],[35,123]],desc:"东方明珠，江南水乡",score:5},
-  "华南":{id:"huanan",cn:"华南地区",en:"South China",ctr:[23.12,113.26],bnd:[[20,109],[26,118]],desc:"南海之滨，改革先锋",score:5},
-  "西南":{id:"xinan",cn:"西南地区",en:"Southwest China",ctr:[30.57,104.06],bnd:[[26,97],[34,110]],desc:"天府之国，巴蜀风情",score:4},
-  "西北":{id:"xibei",cn:"西北地区",en:"Northwest China",ctr:[41.0,85.0],bnd:[[35,73],[49,97]],desc:"大漠孤烟，丝路古道",score:3},
-  "东北":{id:"dongbei",cn:"东北地区",en:"Northeast China",ctr:[41.8,123.4],bnd:[[38,118],[44,132]],desc:"白山黑水，工业摇篮",score:3},
-  "华中":{id:"huazhong",cn:"华中地区",en:"Central China",ctr:[30.59,114.30],bnd:[[29,108],[34,117]],desc:"九省通衢，荆楚大地",score:4},
-  "港澳台":{id:"gangaotai",cn:"港澳台地区",en:"HK,Macau,Taiwan",ctr:[23.7,120.5],bnd:[[21,113],[26,122]],desc:"宝岛明珠，海峡风情",score:4},
+  "华北":{id:"huabei",cn:"华北地区",en:"North China",iso:"cn",ctr:[39.90,116.40],bnd:[[35,110],[43,123]],desc:"京畿重地，千年古都",score:4},
+  "华东":{id:"huadong",cn:"华东地区",en:"East China",iso:"cn",ctr:[31.23,121.47],bnd:[[27,116],[35,123]],desc:"东方明珠，江南水乡",score:5},
+  "华南":{id:"huanan",cn:"华南地区",en:"South China",iso:"cn",ctr:[23.12,113.26],bnd:[[20,109],[26,118]],desc:"南海之滨，改革先锋",score:5},
+  "西南":{id:"xinan",cn:"西南地区",en:"Southwest China",iso:"cn",ctr:[30.57,104.06],bnd:[[26,97],[34,110]],desc:"天府之国，巴蜀风情",score:4},
+  "西北":{id:"xibei",cn:"西北地区",en:"Northwest China",iso:"cn",ctr:[41.0,85.0],bnd:[[35,73],[49,97]],desc:"大漠孤烟，丝路古道",score:3},
+  "东北":{id:"dongbei",cn:"东北地区",en:"Northeast China",iso:"cn",ctr:[41.8,123.4],bnd:[[38,118],[44,132]],desc:"白山黑水，工业摇篮",score:3},
+  "华中":{id:"huazhong",cn:"华中地区",en:"Central China",iso:"cn",ctr:[30.59,114.30],bnd:[[29,108],[34,117]],desc:"九省通衢，荆楚大地",score:4},
+  "港澳台":{id:"gangaotai",cn:"港澳台地区",en:"HK,Macau,Taiwan",iso:"cn",ctr:[23.7,120.5],bnd:[[21,113],[26,122]],desc:"宝岛明珠，海峡风情",score:4},
 };
 
 // Shared GDP years
@@ -338,7 +338,7 @@ function findBestRegion(bounds) {
     const rArea = Math.abs((r.bnd[1][1]-r.bnd[0][1])*(r.bnd[1][0]-r.bnd[0][0]));
     const inside = selLat>=r.bnd[0][0]&&selLat<=r.bnd[1][0]&&selLng>=r.bnd[0][1]&&selLng<=r.bnd[1][1];
     const areaRatio = Math.max(selArea,rArea)/Math.max(Math.min(selArea,rArea),0.0001);
-    all.push({id:r.id,cn:r.cn,type:'china_region',inside,areaRatio,ctr:r.ctr,bnd:r.bnd,rArea});
+    all.push({id:r.id,cn:r.cn,iso:r.iso||'cn',type:'china_region',inside,areaRatio,ctr:r.ctr,bnd:r.bnd,rArea});
   }
 
   // Sort: inside-bounds first, then best area ratio
