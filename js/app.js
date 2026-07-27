@@ -105,7 +105,7 @@ const App = (() => {
     const sc = region.score || Math.min(5, Math.round(((region.econ||region.economy||{}).industry||50)/20));
     document.getElementById('score-hearts').textContent = '❤'.repeat(sc) + '🤍'.repeat(5-sc);
     document.getElementById('score-num').textContent = `(${sc}/5)`;
-    const cnt = CommentsModule.getCommentCount(region.id);
+    const cnt = await CommentsModule.getCommentCount(region.id);
     document.getElementById('score-travelers').textContent = cnt > 0 ? `来自 ${cnt} 位旅人的印象` : '';
 
     // Flag — try multiple sources

@@ -1,0 +1,3 @@
+// Supabase 配置
+const SUPABASE_URL = 'https://ksvajfzjguwplxderyiq.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzdmFqZnpqZ3V3cGx4ZGVyeWlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxNDkzMjYsImV4cCI6MjEwMDcyNTMyNn0.Caf2q6wtQ5OJTI4wVjdGNNiB1ilzn18hksbLeGpB1xk';

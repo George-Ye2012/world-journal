@@ -1,36 +1,87 @@
 /* ============================================================
-   环球手札 — Comments Module (Sticky Notes + Images)
+   环球手札 — Comments Module (Supabase + localStorage cache)
    ============================================================ */
 
 const CommentsModule = (() => {
   let currentRegionId = null;
   let currentRating = 0;
-  let pendingImage = null; // base64 data URL
-  const STORAGE_KEY = 'wj_comments';
-  const MAX_IMAGE_SIZE = 800; // max width/height for stored images
+  let pendingImage = null;
+  let supabase = null;
+  const CACHE_KEY = 'wj_comments_cache';
+  const MAX_IMAGE_SIZE = 800;
+
+  // --- Init Supabase ---
+
+  function getDB() {
+    if (supabase) return supabase;
+    if (typeof SUPABASE_URL !== 'undefined' && SUPABASE_URL && typeof SUPABASE_KEY !== 'undefined' && SUPABASE_KEY) {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    }
+    return supabase;
+  }
 
   // --- Storage ---
 
-  function getAllComments() {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-    } catch { return {}; }
+  async function getAllComments() {
+    const db = getDB();
+    if (db) {
+      try {
+        const { data, error } = await db.from('comments').select('*').order('created_at', { ascending: false });
+        if (!error && data) {
+          // Group by region_id
+          const grouped = {};
+          data.forEach(row => {
+            if (!grouped[row.region_id]) grouped[row.region_id] = [];
+            grouped[row.region_id].push({
+              text: row.text,
+              rating: row.rating,
+              image: row.image,
+              color: row.color,
+              rotation: row.rotation,
+              date: new Date(row.created_at).toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' })
+            });
+          });
+          // Update cache
+          try { localStorage.setItem(CACHE_KEY, JSON.stringify(grouped)); } catch(e) {}
+          return grouped;
+        }
+      } catch(e) { console.warn('Supabase read failed, using cache', e); }
+    }
+    // Fallback to cache
+    try { return JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch(e) { return {}; }
   }
 
-  function getCommentsForRegion(regionId) {
-    const all = getAllComments();
+  async function getCommentsForRegion(regionId) {
+    const all = await getAllComments();
     return all[regionId] || [];
   }
 
-  function saveComment(regionId, comment) {
-    const all = getAllComments();
+  async function saveComment(regionId, comment) {
+    const db = getDB();
+    if (db) {
+      try {
+        const { error } = await db.from('comments').insert({
+          region_id: regionId,
+          text: comment.text,
+          rating: comment.rating,
+          image: comment.image || null,
+          color: comment.color,
+          rotation: comment.rotation,
+          created_at: new Date().toISOString()
+        });
+        if (!error) return; // Success
+      } catch(e) { console.warn('Supabase write failed, using localStorage', e); }
+    }
+    // Fallback to localStorage
+    const all = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
     if (!all[regionId]) all[regionId] = [];
     all[regionId].push(comment);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(all)); } catch(e) {}
   }
 
-  function getCommentCount(regionId) {
-    return getCommentsForRegion(regionId).length;
+  async function getCommentCount(regionId) {
+    const comments = await getCommentsForRegion(regionId);
+    return comments.length;
   }
 
   // --- Image compression ---
@@ -40,19 +91,12 @@ const CommentsModule = (() => {
       const img = new Image();
       img.onload = () => {
         let { width, height } = img;
-        if (width <= MAX_IMAGE_SIZE && height <= MAX_IMAGE_SIZE) {
-          resolve(dataUrl);
-          return;
-        }
+        if (width <= MAX_IMAGE_SIZE && height <= MAX_IMAGE_SIZE) { resolve(dataUrl); return; }
         const ratio = Math.min(MAX_IMAGE_SIZE / width, MAX_IMAGE_SIZE / height);
-        width = Math.round(width * ratio);
-        height = Math.round(height * ratio);
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.75));
+        width = Math.round(width * ratio); height = Math.round(height * ratio);
+        const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.6));
       };
       img.src = dataUrl;
     });
@@ -60,13 +104,13 @@ const CommentsModule = (() => {
 
   // --- Render ---
 
-  function render(regionId) {
+  async function render(regionId) {
     currentRegionId = regionId;
     const container = document.getElementById('notes-container');
     const emptyState = document.getElementById('empty-notes');
     if (!container) return;
 
-    const comments = getCommentsForRegion(regionId);
+    const comments = await getCommentsForRegion(regionId);
     container.innerHTML = '';
 
     if (comments.length === 0) {
@@ -74,11 +118,9 @@ const CommentsModule = (() => {
     } else {
       if (emptyState) emptyState.classList.add('hidden');
       comments.forEach((c, i) => {
-        const note = createNoteElement(c, i);
-        container.appendChild(note);
+        container.appendChild(createNoteElement(c, i));
       });
     }
-
     resetInput();
   }
 
@@ -89,51 +131,28 @@ const CommentsModule = (() => {
     note.style.transform = `rotate(${comment.rotation || randomRotation()}deg)`;
     note.style.zIndex = index;
 
-    // Pushpin
-    const pin = document.createElement('div');
-    pin.className = 'note-pushpin';
+    const pin = document.createElement('div'); pin.className = 'note-pushpin';
+    const stars = document.createElement('div'); stars.className = 'note-stars';
+    const r = comment.rating || 0;
+    stars.innerHTML = '★'.repeat(r) + '☆'.repeat(5 - r);
 
-    // Stars
-    const stars = document.createElement('div');
-    stars.className = 'note-stars';
-    const fullStars = comment.rating || 0;
-    stars.innerHTML = '★'.repeat(fullStars) + '☆'.repeat(5 - fullStars);
-
-    // Image (if present)
     let imageEl = null;
     if (comment.image) {
       imageEl = document.createElement('img');
-      imageEl.className = 'note-image';
-      imageEl.src = comment.image;
-      imageEl.alt = '旅人照片';
-      imageEl.loading = 'lazy';
+      imageEl.className = 'note-image'; imageEl.src = comment.image;
+      imageEl.alt = '旅人照片'; imageEl.loading = 'lazy';
     }
 
-    // Text
-    const text = document.createElement('div');
-    text.className = 'note-text';
-    text.textContent = comment.text;
+    const text = document.createElement('div'); text.className = 'note-text'; text.textContent = comment.text;
+    const footer = document.createElement('div'); footer.className = 'note-footer';
+    const author = document.createElement('span'); author.className = 'note-author'; author.textContent = '— 匿名旅人';
+    const date = document.createElement('span'); date.className = 'note-date'; date.textContent = comment.date || '';
 
-    // Footer
-    const footer = document.createElement('div');
-    footer.className = 'note-footer';
-    const author = document.createElement('span');
-    author.className = 'note-author';
-    author.textContent = '— 匿名旅人';
-    const date = document.createElement('span');
-    date.className = 'note-date';
-    date.textContent = comment.date || '';
-
-    footer.appendChild(author);
-    footer.appendChild(date);
-
-    note.appendChild(pin);
-    note.appendChild(stars);
+    footer.appendChild(author); footer.appendChild(date);
+    note.appendChild(pin); note.appendChild(stars);
     if (imageEl) note.appendChild(imageEl);
-    note.appendChild(text);
-    note.appendChild(footer);
+    note.appendChild(text); note.appendChild(footer);
 
-    // Entrance animation
     note.style.opacity = '0';
     note.style.transform = `rotate(${comment.rotation || 0}deg) translateY(-20px)`;
     setTimeout(() => {
@@ -145,116 +164,74 @@ const CommentsModule = (() => {
     return note;
   }
 
+  // --- Input Reset ---
+
   function resetInput() {
-    currentRating = 0;
-    pendingImage = null;
+    currentRating = 0; pendingImage = null;
     document.getElementById('note-textarea').value = '';
     document.getElementById('rating-hint').textContent = '';
     const preview = document.getElementById('note-image-preview');
     const removeBtn = document.getElementById('note-image-remove');
     const fileInput = document.getElementById('note-image-input');
-    preview.style.display = 'none';
-    preview.src = '';
-    removeBtn.style.display = 'none';
+    if (preview) { preview.style.display = 'none'; preview.src = ''; }
+    if (removeBtn) removeBtn.style.display = 'none';
     if (fileInput) fileInput.value = '';
-    const stars = document.querySelectorAll('#star-rating .star');
-    stars.forEach(s => {
+    document.querySelectorAll('#star-rating .star').forEach(s => {
       s.classList.remove('active', 'hover');
       s.querySelector('i').className = 'fa-regular fa-star';
     });
   }
 
-  // --- Star Rating Interaction ---
+  // --- Star Rating ---
 
   function initStarRating() {
-    const starContainer = document.getElementById('star-rating');
-    if (!starContainer) return;
-
-    const stars = starContainer.querySelectorAll('.star');
-
-    stars.forEach(star => {
-      star.addEventListener('mouseenter', () => {
-        const val = parseInt(star.dataset.star);
-        highlightStars(val, 'hover');
-      });
-      star.addEventListener('mouseleave', () => {
-        clearHighlights();
-        if (currentRating > 0) highlightStars(currentRating, 'active');
-      });
+    const sc = document.getElementById('star-rating'); if (!sc) return;
+    sc.querySelectorAll('.star').forEach(star => {
+      star.addEventListener('mouseenter', () => highlightStars(parseInt(star.dataset.star), 'hover'));
+      star.addEventListener('mouseleave', () => { clearHighlights(); if (currentRating > 0) highlightStars(currentRating, 'active'); });
       star.addEventListener('click', () => {
-        const val = parseInt(star.dataset.star);
-        currentRating = val;
-        SoundFX.starClick();
-        clearHighlights();
-        highlightStars(val, 'active');
-        document.getElementById('rating-hint').textContent = `你给了 ${val} 颗星`;
+        currentRating = parseInt(star.dataset.star);
+        SoundFX.starClick(); clearHighlights(); highlightStars(currentRating, 'active');
+        document.getElementById('rating-hint').textContent = `你给了 ${currentRating} 颗星`;
       });
     });
   }
 
-  function highlightStars(count, className) {
-    const stars = document.querySelectorAll('#star-rating .star');
-    stars.forEach(s => {
-      const val = parseInt(s.dataset.star);
-      if (val <= count) {
-        s.classList.add(className);
-        s.querySelector('i').className = 'fa-solid fa-star';
-      }
+  function highlightStars(count, cls) {
+    document.querySelectorAll('#star-rating .star').forEach(s => {
+      if (parseInt(s.dataset.star) <= count) { s.classList.add(cls); s.querySelector('i').className = 'fa-solid fa-star'; }
     });
   }
 
   function clearHighlights() {
-    const stars = document.querySelectorAll('#star-rating .star');
-    stars.forEach(s => {
+    document.querySelectorAll('#star-rating .star').forEach(s => {
       s.classList.remove('hover');
-      if (!s.classList.contains('active')) {
-        s.querySelector('i').className = 'fa-regular fa-star';
-      }
+      if (!s.classList.contains('active')) s.querySelector('i').className = 'fa-regular fa-star';
     });
   }
 
   // --- Image Upload ---
 
   function initImageUpload() {
-    const fileInput = document.getElementById('note-image-input');
+    const fi = document.getElementById('note-image-input');
     const preview = document.getElementById('note-image-preview');
     const removeBtn = document.getElementById('note-image-remove');
+    if (!fi) return;
 
-    if (!fileInput) return;
-
-    fileInput.addEventListener('change', async () => {
-      const file = fileInput.files[0];
-      if (!file) return;
-
-      // Check file type
-      if (!file.type.startsWith('image/')) {
-        alert('请选择图片文件');
-        return;
-      }
-
-      // Check file size (max 2MB)
-      if (file.size > 2 * 1024 * 1024) {
-        alert('图片不能超过 2MB');
-        return;
-      }
-
-      // Read as base64
+    fi.addEventListener('change', async () => {
+      const file = fi.files[0]; if (!file) return;
+      if (!file.type.startsWith('image/')) return alert('请选择图片文件');
+      if (file.size > 2 * 1024 * 1024) return alert('图片不能超过 2MB');
       const reader = new FileReader();
       reader.onload = async (e) => {
         pendingImage = await compressImage(e.target.result);
-        preview.src = pendingImage;
-        preview.style.display = 'block';
-        removeBtn.style.display = 'flex';
+        preview.src = pendingImage; preview.style.display = 'block'; removeBtn.style.display = 'flex';
       };
       reader.readAsDataURL(file);
     });
 
     removeBtn.addEventListener('click', () => {
-      pendingImage = null;
-      preview.style.display = 'none';
-      preview.src = '';
-      removeBtn.style.display = 'none';
-      fileInput.value = '';
+      pendingImage = null; preview.style.display = 'none'; preview.src = ''; removeBtn.style.display = 'none'; fi.value = '';
     });
   }
 
@@ -263,55 +240,32 @@ const CommentsModule = (() => {
   function initSubmit() {
     const btn = document.getElementById('btn-submit-note');
     const textarea = document.getElementById('note-textarea');
+    if (!btn) return;
 
-    if (!btn || !textarea) return;
-
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const text = textarea.value.trim();
       if (!text && !pendingImage) return;
-
-      if (currentRating === 0) {
-        document.getElementById('rating-hint').textContent = '请先给个评分吧～';
-        return;
-      }
+      if (currentRating === 0) { document.getElementById('rating-hint').textContent = '请先给个评分吧～'; return; }
 
       const comment = {
-        text: text || '',
-        rating: currentRating,
-        color: randomNoteColor(),
+        text: text || '', rating: currentRating, color: randomNoteColor(),
         rotation: randomRotation(),
-        date: new Date().toLocaleDateString('zh-CN', {
-          year: 'numeric', month: 'short', day: 'numeric'
-        })
+        date: new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' })
       };
+      if (pendingImage) comment.image = pendingImage;
 
-      if (pendingImage) {
-        comment.image = pendingImage;
-      }
-
-      saveComment(currentRegionId, comment);
-      SoundFX.pushpinTack();
-      SoundFX.stickerSlap();
-
+      await saveComment(currentRegionId, comment);
+      SoundFX.pushpinTack(); SoundFX.stickerSlap();
       btn.style.transform = 'scale(0.95)';
       setTimeout(() => { btn.style.transform = ''; }, 150);
-
-      setTimeout(() => render(currentRegionId), 200);
+      setTimeout(() => render(currentRegionId), 300);
     });
 
     textarea.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        btn.click();
-      }
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); btn.click(); }
     });
   }
 
-  function init() {
-    initStarRating();
-    initImageUpload();
-    initSubmit();
-  }
-
+  function init() { initStarRating(); initImageUpload(); initSubmit(); }
   return { init, render, getCommentCount };
 })();
